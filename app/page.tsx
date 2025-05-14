@@ -7,6 +7,7 @@ export default function App() {
   const { setFrameReady, isFrameReady } = useMiniKit();
 
   const [isBurgerBig, setIsBurgerBig] = useState(false);
+  const [score, setScore] = useState(0);
   const [particles, setParticles] = useState<{ id: number; dx: number; dy: number }[]>([]);
 
   const handleBurgerClick = () => {
@@ -22,6 +23,9 @@ export default function App() {
     const dy = Math.sin(angle) * distance;
     setParticles((prev) => [...prev, { id, dx, dy }]);
 
+    // Increment score
+    setScore((prev) => prev + 1);
+
     // Remove after animation
     setTimeout(() => {
       setParticles((prev) => prev.filter((p) => p.id !== id));
@@ -35,7 +39,23 @@ export default function App() {
   }, [setFrameReady, isFrameReady]);
 
   return (
-    <div className="flex flex-col min-h-screen items-center font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
+    <div className="relative flex flex-col min-h-screen items-center font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
+      {/* Score */}
+      <div className="absolute top-4 right-4 text-xl font-bold select-none">
+        Score: {score}
+      </div>
+
+      {/* Header */}
+      <div className="mt-6 flex items-center space-x-3 select-none">
+        <span className="text-3xl font-extrabold">Welcome to</span>
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/McDonald%27s_logo.svg/2560px-McDonald%27s_logo.svg.png"
+          alt="McDonald's logo"
+          className="w-36 h-auto"
+          draggable={false}
+        />
+      </div>
+
       <main className="flex-1 flex items-center justify-center">
         <div className="relative flex items-center justify-center">
           {/* Burger SVG */}
@@ -64,7 +84,7 @@ export default function App() {
               key={id}
               src="https://www.svgheart.com/wp-content/uploads/2020/09/-60.png"
               alt="Burger accessory"
-              className="absolute w-12 h-12 object-contain animate-particle pointer-events-none select-none"
+              className="absolute w-24 h-24 object-contain animate-particle pointer-events-none select-none"
               style={{
                 // CSS custom properties for the keyframes
                 "--dx": `${dx}px`,
