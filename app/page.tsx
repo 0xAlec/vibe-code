@@ -118,6 +118,11 @@ export default function App() {
         />
       </div>
 
+      {/* Subheader */}
+      <p className="mt-2 text-center text-sm max-w-md px-4 select-none">
+        Flip the burger to pump the price of Ethereum! Don&apos;t let it fall below the threshold or it&apos;s game over!
+      </p>
+
       {/* Stock chart background */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
