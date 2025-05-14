@@ -1,18 +1,5 @@
 "use client";
 
-import {
-  Name,
-  Identity,
-  Address,
-  Avatar,
-  EthBalance,
-} from "@coinbase/onchainkit/identity";
-import {
-  ConnectWallet,
-  Wallet,
-  WalletDropdown,
-  WalletDropdownDisconnect,
-} from "@coinbase/onchainkit/wallet";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useEffect, useState } from "react";
 
@@ -49,23 +36,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen items-center font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
-      <header className="w-full max-w-md px-4 py-3 flex justify-center h-11">
-        <Wallet>
-          <ConnectWallet>
-            <Name className="text-inherit" />
-          </ConnectWallet>
-          <WalletDropdown>
-            <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-              <Avatar />
-              <Name />
-              <Address />
-              <EthBalance />
-            </Identity>
-            <WalletDropdownDisconnect />
-          </WalletDropdown>
-        </Wallet>
-      </header>
-
       <main className="flex-1 flex items-center justify-center">
         <div className="relative flex items-center justify-center">
           {/* Burger SVG */}
