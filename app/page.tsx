@@ -8,20 +8,21 @@ export default function App() {
 
   const [isBurgerBig, setIsBurgerBig] = useState(false);
   const [score, setScore] = useState(0);
-  const [particles, setParticles] = useState<{ id: number; dx: number; dy: number }[]>([]);
+  const [particles, setParticles] = useState<{ id: number; dx: number; dy: number; x: number; y: number }[]>([]);
 
-  const handleBurgerClick = () => {
+  const handleBurgerClick = (e: React.MouseEvent) => {
     setIsBurgerBig(true);
     // Reset size after 200ms
     setTimeout(() => setIsBurgerBig(false), 200);
 
     // Emit image particle
     const id = Date.now();
+    const { clientX: x, clientY: y } = e;
     const angle = Math.random() * Math.PI * 2;
     const distance = 80; // px
     const dx = Math.cos(angle) * distance;
     const dy = Math.sin(angle) * distance;
-    setParticles((prev) => [...prev, { id, dx, dy }]);
+    setParticles((prev) => [...prev, { id, dx, dy, x, y }]);
 
     // Increment score
     setScore((prev) => prev + 1);
@@ -78,21 +79,24 @@ export default function App() {
             <rect x="8" y="48" width="48" height="4" fill="#9C4221" />
           </svg>
 
-          {/* Emitted images */}
-          {particles.map(({ id, dx, dy }) => (
-            <img
-              key={id}
-              src="https://www.svgheart.com/wp-content/uploads/2020/09/-60.png"
-              alt="Burger accessory"
-              className="absolute w-24 h-24 object-contain animate-particle pointer-events-none select-none"
-              style={{
-                // CSS custom properties for the keyframes
-                "--dx": `${dx}px`,
-                "--dy": `${dy}px`,
-              } as React.CSSProperties}
-              draggable={false}
-            />
-          ))}
+          {/* Particles handled in overlay */}
+          <div className="fixed inset-0 pointer-events-none select-none z-50">
+            {particles.map(({ id, dx, dy, x, y }) => (
+              <img
+                key={id}
+                src="https://www.svgheart.com/wp-content/uploads/2020/09/-60.png"
+                alt="Burger accessory"
+                className="absolute w-24 h-24 object-contain animate-particle"
+                style={{
+                  left: x,
+                  top: y,
+                  "--dx": `${dx}px`,
+                  "--dy": `${dy}px`,
+                } as React.CSSProperties}
+                draggable={false}
+              />
+            ))}
+          </div>
         </div>
       </main>
 
