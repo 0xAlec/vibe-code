@@ -69,6 +69,12 @@ export default function App() {
           >
             {/* Top bun */}
             <path d="M8 24h48c0-8-12-12-24-12S8 16 8 24z" fill="#FCD34D" />
+            {/* Sesame seeds */}
+            <ellipse cx="18" cy="18" rx="2" ry="3" fill="#FFF7D6" />
+            <ellipse cx="26" cy="14" rx="2" ry="3" fill="#FFF7D6" transform="rotate(-10 26 14)" />
+            <ellipse cx="34" cy="17" rx="2" ry="3" fill="#FFF7D6" transform="rotate(12 34 17)" />
+            <ellipse cx="42" cy="15" rx="2" ry="3" fill="#FFF7D6" transform="rotate(-8 42 15)" />
+            <ellipse cx="50" cy="19" rx="2" ry="3" fill="#FFF7D6" transform="rotate(6 50 19)" />
             {/* Patty */}
             <rect x="8" y="24" width="48" height="8" fill="#9C4221" />
             {/* Lettuce */}
