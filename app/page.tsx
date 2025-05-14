@@ -1,7 +1,7 @@
 "use client";
 
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function App() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -9,6 +9,52 @@ export default function App() {
   const [isBurgerBig, setIsBurgerBig] = useState(false);
   const [score, setScore] = useState(0);
   const [particles, setParticles] = useState<{ id: number; dx: number; dy: number; x: number; y: number }[]>([]);
+  const [gameOver, setGameOver] = useState(false);
+
+  // Stock chart candles
+  type Candle = { height: number; green: boolean };
+  const [candles, setCandles] = useState<Candle[]>([]);
+
+  // Reference to track last candle height for trending logic
+  const lastHeightRef = useRef(140);
+  const lastClickRef = useRef(Date.now());
+
+  // initialize red candles trending downward
+  useEffect(() => {
+    const h = lastHeightRef.current; // 140
+    const initial: Candle[] = [{ height: h, green: true }];
+    lastHeightRef.current = h;
+    setCandles(initial);
+  }, []);
+
+  // Live ticker that keeps adding red candles over time (negative trend)
+  useEffect(() => {
+    if (gameOver) return;
+
+    const interval = setInterval(() => {
+      setCandles((prev) => {
+        // If user clicked within last 400ms, skip red candle
+        if (Date.now() - lastClickRef.current < 400) {
+          return prev;
+        }
+
+        let h = lastHeightRef.current;
+        const delta = 4 + Math.random() * 6; // 4-10 px drop
+        h = Math.max(0, h - delta); // price going down
+
+        // Check for game over threshold (below 25)
+        if (h <= 25) {
+          setGameOver(true);
+        }
+
+        lastHeightRef.current = h;
+        const next = [...prev, { height: h, green: false }];
+        return next.slice(-60);
+      });
+    }, 300); // faster fall
+
+    return () => clearInterval(interval);
+  }, [gameOver]);
 
   const handleBurgerClick = (e: React.MouseEvent) => {
     setIsBurgerBig(true);
@@ -16,6 +62,8 @@ export default function App() {
     setTimeout(() => setIsBurgerBig(false), 200);
 
     // Emit image particle
+    if (gameOver) return;
+
     const id = Date.now();
     const { clientX: x, clientY: y } = e;
     const angle = Math.random() * Math.PI * 2;
@@ -27,10 +75,23 @@ export default function App() {
     // Increment score
     setScore((prev) => prev + 1);
 
+    // Add a green candle (price pump)
+    setCandles((prev) => {
+      let h = lastHeightRef.current;
+      const delta = 5 + Math.random() * 10; // 5-15 px rise
+      h = Math.min(140, h + delta); // gradual pump up
+      lastHeightRef.current = h;
+      const next = [...prev, { height: h, green: true }];
+      return next.slice(-60);
+    });
+
     // Remove after animation
     setTimeout(() => {
       setParticles((prev) => prev.filter((p) => p.id !== id));
     }, 600);
+
+    // mark last click time to suppress next red candle
+    lastClickRef.current = Date.now();
   };
 
   useEffect(() => {
@@ -57,7 +118,41 @@ export default function App() {
         />
       </div>
 
-      <main className="flex-1 flex items-center justify-center">
+      {/* Stock chart background */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+        viewBox={`0 0 ${Math.max(60, candles.length || 1) * 10} 160`}
+        preserveAspectRatio="none"
+      >
+        {candles.map((c, i) => {
+          const x = i * 10 + 2;
+          const y = 160 - c.height;
+          return (
+            <rect
+              key={i}
+              x={x}
+              y={y}
+              width={6}
+              height={c.height}
+              fill={c.green ? "#22c55e" : "#ef4444"}
+              opacity={0.4}
+            />
+          );
+        })}
+
+        {/* Game over threshold line */}
+        <line
+          x1={0}
+          y1={160 - 25}
+          x2={Math.max(60, candles.length || 1) * 10}
+          y2={160 - 25}
+          stroke="#ef4444"
+          strokeDasharray="4 4"
+          strokeWidth={2}
+        />
+      </svg>
+
+      <main className="flex-1 flex items-center justify-center z-10 relative">
         <div className="relative flex items-center justify-center">
           {/* Burger SVG */}
           <svg
@@ -122,6 +217,13 @@ export default function App() {
           animation: particleFly 0.6s ease-out forwards;
         }
       `}</style>
+
+      {/* Game Over overlay */}
+      {gameOver && (
+        <div className="fixed inset-0 flex items-center justify-center z-40 bg-black bg-opacity-60 select-none">
+          <span className="text-5xl font-extrabold text-red-500">Game Over</span>
+        </div>
+      )}
     </div>
   );
 }
